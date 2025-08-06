@@ -1,0 +1,170 @@
+create database project;
+use project;
+
+-- Table: investment_types
+CREATE TABLE investment_types (
+    type_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL
+);
+ 
+-- Table: investment_subcategories
+CREATE TABLE investment_subcategories (
+    subcat_id INT AUTO_INCREMENT PRIMARY KEY,
+    type_id INT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    FOREIGN KEY (type_id) REFERENCES investment_types(type_id)
+);
+ 
+-- Table: investments
+CREATE TABLE investments (
+    investment_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    type_id INT NOT NULL,
+    subcat_id INT NOT NULL,
+    location VARCHAR(100),
+    remarks TEXT,
+    FOREIGN KEY (type_id) REFERENCES investment_types(type_id),
+    FOREIGN KEY (subcat_id) REFERENCES investment_subcategories(subcat_id)
+);
+ 
+-- Table: transactions
+CREATE TABLE transactions (
+    txn_id INT AUTO_INCREMENT PRIMARY KEY,
+    investment_id INT NOT NULL,
+    txn_type ENUM('BUY', 'SELL') NOT NULL,
+    quantity DECIMAL(18, 4) NOT NULL,
+    price_per_unit DECIMAL(18, 4) NOT NULL,
+    txn_date DATE NOT NULL,
+    remarks TEXT,
+    FOREIGN KEY (investment_id) REFERENCES investments(investment_id)
+);
+ 
+-- Table: price_history
+CREATE TABLE price_history (
+    history_id INT AUTO_INCREMENT PRIMARY KEY,
+    investment_id INT NOT NULL,
+    price DECIMAL(18, 4) NOT NULL,
+    date DATE NOT NULL,
+    source VARCHAR(100),
+    FOREIGN KEY (investment_id) REFERENCES investments(investment_id)
+);
+ 
+-- Table: live_prices
+CREATE TABLE live_prices (
+    investment_id INT PRIMARY KEY,
+    latest_price DECIMAL(18, 4) NOT NULL,
+    last_updated DATETIME NOT NULL,
+    source VARCHAR(100),
+    FOREIGN KEY (investment_id) REFERENCES investments(investment_id)
+);
+ 
+-- Table: api_mapping (optional)
+CREATE TABLE api_mapping (
+    investment_id INT PRIMARY KEY,
+    api_code VARCHAR(100) NOT NULL,
+    source VARCHAR(100) NOT NULL,
+    FOREIGN KEY (investment_id) REFERENCES investments(investment_id)
+);
+
+INSERT INTO investment_types (type_id, name) VALUES
+  (1, 'Equity'),
+  (2, 'Mutual Fund'),
+  (3, 'Gold'),
+  (4, 'Real Estate');
+  
+  INSERT INTO investment_subcategories (subcat_id, type_id, name) VALUES
+  (1, 1, 'Large Cap'),
+  (2, 1, 'Mid Cap'),
+  (3, 1, 'Small Cap'),
+  (4, 2, 'Large Cap'),
+  (5, 2, 'Mid Cap'),
+  (6, 2, 'Small Cap'),
+  (7, 3, 'Physical'),
+  (8, 3, 'Digital'),
+  (9, 4, 'Commercial')
+  (10, 4, 'Residential'),
+  (11, 4, 'Land');
+  
+  INSERT INTO investments (investment_id, name, type_id, subcat_id, location, remarks) VALUES
+  (1, 'Reliance Industries Ltd.', 1, 1, NULL, 'NSE Stock'),
+  (2, 'Bajaj Finance Ltd.', 1, 2, NULL, 'NSE Stock'),
+  (3, 'Tata Elxsi Ltd.', 1, 3, NULL, 'NSE Stock'),
+  (4, 'Nippon India Large Cap Fund', 2, 4, NULL, 'Mutual Fund'),
+  (5, 'Axis Midcap Fund', 2, 5, NULL, 'Mutual Fund'),
+  (6, 'Quant Small Cap Fund', 2, 6, NULL, 'Mutual Fund'),
+  (7, 'BIS 24 Carat Gold Coin', 3, 7, NULL, 'Physical Gold'),
+  (8, 'Digital Gold (MMTC-PAMP)', 3, 8, NULL, 'Digital Gold'),
+  (9, '440 sq ft Office Space - Kothrud, Pune', 4, 9, 'Kothrud, Pune', 'Commercial Property'),
+  (10, '3BHK Flat - Aundh, Pune', 4, 10, 'Aundh, Pune', 'Residential Property'),
+  (11, '2 Acres Agriculture Land - Hinjewadi, Pune', 4, 11, 'Hinjewadi, Pune', 'Land');
+  
+  -- Equities
+INSERT INTO transactions (txn_id, investment_id, txn_type, quantity, price_per_unit, txn_date, remarks) VALUES
+  (1, 1, 'BUY', 30, 2450.00, '2021-07-19', 'Initial buy'),
+  (2, 2, 'BUY', 10, 6200.00, '2022-01-04', 'Initial buy'),
+  (3, 3, 'BUY', 15, 2790.00, '2023-06-14', 'Initial buy'),
+ 
+-- Mutual Funds
+  (4, 4, 'BUY', 100, 85.50, '2021-09-06', 'Lump sum'),
+  (5, 5, 'BUY', 80, 68.20, '2022-02-10', 'SIP'),
+  (6, 6, 'BUY', 50, 74.00, '2022-12-18', 'Lump sum'),
+ 
+-- Gold
+  (7, 7, 'BUY', 20, 62500.00, '2022-11-23', '20g coin'),
+  (8, 8, 'BUY', 5, 6050.00, '2023-04-15', '5g digital'),
+ 
+-- Real Estate
+  (9, 9, 'BUY', 1, 12500000.00, '2021-10-01', '440 sq ft office'),
+  (10, 10, 'BUY', 1, 9200000.00, '2022-02-20', '3BHK flat, Aundh'),
+  (11, 11, 'BUY', 2, 4700000.00, '2023-01-15', '2 acres land, Hinjewadi');
+  
+  INSERT INTO price_history (history_id, investment_id, price, date, source) VALUES
+  (1, 1, 2450.00, '2021-07-19', 'NSE'),
+  (2, 1, 2650.00, '2022-07-19', 'NSE'),
+  (3, 1, 2940.00, '2023-07-19', 'NSE'),
+  (4, 1, 3120.00, '2024-06-15', 'NSE'),
+ 
+  (5, 2, 6200.00, '2022-01-04', 'NSE'),
+  (6, 2, 6900.00, '2023-01-04', 'NSE'),
+  (7, 2, 7650.00, '2024-06-15', 'NSE'),
+ 
+  (8, 3, 2790.00, '2023-06-14', 'NSE'),
+  (9, 3, 3040.00, '2024-06-15', 'NSE'),
+ 
+  (10, 4, 85.50, '2021-09-06', 'AMFI'),
+  (11, 4, 96.20, '2024-06-15', 'AMFI'),
+ 
+  (12, 5, 68.20, '2022-02-10', 'AMFI'),
+  (13, 5, 89.50, '2024-06-15', 'AMFI'),
+ 
+  (14, 6, 74.00, '2022-12-18', 'AMFI'),
+  (15, 6, 119.70, '2024-06-15', 'AMFI'),
+ 
+  (16, 7, 62500.00, '2022-11-23', 'Jeweller'),
+  (17, 7, 72000.00, '2024-06-15', 'Jeweller'),
+ 
+  (18, 8, 6050.00, '2023-04-15', 'MMTC-PAMP'),
+  (19, 8, 7250.00, '2024-06-15', 'MMTC-PAMP'),
+ 
+  (20, 9, 12500000.00, '2021-10-01', 'Market Survey'),
+  (21, 9, 15500000.00, '2024-06-10', 'Broker'),
+ 
+  (22, 10, 9200000.00, '2022-02-20', 'Market Survey'),
+  (23, 10, 10500000.00, '2024-06-11', 'Property Dealer'),
+ 
+  (24, 11, 4700000.00, '2023-01-15', 'Land Registry'),
+  (25, 11, 6000000.00, '2024-06-12', 'Land Registry');
+  
+  INSERT INTO live_prices (investment_id, latest_price, last_updated, source) VALUES
+  (1, 3120.00, '2024-06-15 12:34:00', 'NSE'),
+  (2, 7650.00, '2024-06-15 12:34:00', 'NSE'),
+  (3, 3040.00, '2024-06-15 12:34:00', 'NSE'),
+  (4, 96.20, '2024-06-15 09:10:00', 'AMFI'),
+  (5, 89.50, '2024-06-15 09:10:00', 'AMFI'),
+  (6, 119.70, '2024-06-15 09:10:00', 'AMFI'),
+  (7, 72000.00, '2024-06-15 08:00:00', 'Jeweller'),
+  (8, 7250.00, '2024-06-15 08:00:00', 'MMTC-PAMP'),
+  (9, 15500000.00, '2024-06-10 13:30:00', 'Broker'),
+  (10, 10500000.00, '2024-06-11 11:20:00', 'Property Dealer'),
+  (11, 6000000.00, '2024-06-12 10:00:00', 'Land Registry');
+  
