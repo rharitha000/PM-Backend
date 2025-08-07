@@ -1,5 +1,25 @@
 const Investment = require('../models/investmentModel')
 
+exports.getOverallInvestments = (req, res) => {
+    Investment.getOverallSummary((err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Error fetching investment summary" });
+        }
+        res.status(200).json(results);
+    });
+};
+exports.getPortfolioSummary = (req, res) => {
+    Investment.getPortfolioSummary((err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Failed to fetch portfolio summary" });
+        }
+        res.status(200).json(result);
+    });
+};
+
+
 exports.getAllInvestments = (req, res) => {
     Investment.getAll((error, results) => {
         if (error) {
@@ -19,7 +39,7 @@ exports.getInvestmentById = (req, res) => {
         if (result.length === 0) {
             return res.status(404).json({ message: 'Investment not found' });
         }
-        res.status(200).json(result[0]);
+        res.status(200).json(result);
     })
 }
 
